@@ -63,7 +63,39 @@ public class Main {
 	   
 	   while(rs.next()){
 	   System.out.println(rs.getString(1));
-	   }		
+	   }
+	   /* Operations that I have to do in Edepot so I can work on Emart
+	    * which is super hard
+	    * 1. Baby Steps, perform: checking quantity of a given Item number
+	    */
+	   int option;
+	   Scanner read = new Scanner(System.in);
+	   System.out.println("What would you like to do today?");
+	   System.out.println("Enter 3 to check an Item quantity");
+	   option =  read.nextInt();
+	   switch(option){
+	   case 3:
+		   try{
+			   String stock;
+			   System.out.println("Please Insert Stock Number:");
+			   stock = read.next();
+			   sql = "SELECT QUANTITY FROM WAREHOUSE_ITEM WHERE '"+stock+"'= STOCK_NUM";
+			   p = Connect.prepareStatement(sql);
+			   rs = p.executeQuery();
+			   if(rs.next())
+				   System.out.println(rs.getString(1));
+			   rs.close();
+		   }
+		   catch(Exception e){
+			   e.printStackTrace();
+		   }
+	   
+	   
+	   				 
+	   				 }
+	   
+	   
+	   		
 	   
 	   
 	   
