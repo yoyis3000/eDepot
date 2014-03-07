@@ -21,10 +21,10 @@ public class Main {
 		Statement stmt= Connect.createStatement();
 		//Scanner reader = new Scanner(System.in);
 		System.out.println("Testing if this actually works currently");
-	    String sql = "INSERT INTO ship_item " +
-	    			 "VALUES ('101','Puma','111',1,3,'Guatemala',5,8)";
+	    //String sql = "INSERT INTO ship_item " +
+	    	//		 "VALUES ('101','Puma','111',1,3,'Guatemala',5,8)";
 	    System.out.println("test git");
-	    stmt.executeUpdate(sql);
+	   // stmt.executeUpdate(sql);
 	   
 		
 		
