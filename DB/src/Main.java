@@ -1,7 +1,7 @@
 
 import java.util.Scanner;
 import java.sql.*;
-
+import java.util.*;
 public class Main {
 	static Connection Connect;
 	static Op Operate;
@@ -52,7 +52,10 @@ public class Main {
 	   
 	   sql = "INSERT INTO Shipping_List " +
 			   "VALUES('101','FakeStuff','787','313',2)";
-	   stmt.executeUpdate(sql);*/
+	   stmt.executeUpdate(sql);
+	   
+	   *
+	   							*/
 	   sql = "SELECT SHIPPING_LIST.MANUFACTURER FROM SHIPPING_NOTICE JOIN SHIPPING_LIST"
 	   		+ " ON SHIPPING_NOTICE.SNI = SHIPPING_LIST.SNI WHERE SHIPPING_LIST.SNI = '333'";
 	   int random = 500;
@@ -72,6 +75,8 @@ public class Main {
 	   Scanner read = new Scanner(System.in);
 	   System.out.println("What would you like to do today?");
 	   System.out.println("Enter 3 to check an Item quantity");
+	   System.out.println("Enter 4 If you are the manager");
+	   
 	   option =  read.nextInt();
 	   switch(option){
 	   case 3:
@@ -89,7 +94,120 @@ public class Main {
 		   catch(Exception e){
 			   e.printStackTrace();
 		   }
-	   
+		   break;
+	   case 4:
+		   //Going to send a shipping Notice
+			   System.out.println("Sup bro what would you like to do today?");
+			   System.out.println("Enter 1 if you want order some stock");
+			   option =  read.nextInt();
+			   switch(option){
+			   
+			   case 1:
+			   	   String Manu,Model,ShipName,yn;
+				   String quantity;
+				  
+				   Random r = new Random();
+				   int new_sni = r.nextInt((9999-1000)+1) + 1000;
+				   Integer.toString(new_sni);
+				   
+				   System.out.println("Please Insert Shipping Comany Name:");
+				   ShipName = read.next();
+				   try{
+					   sql = "INSERT INTO SHIPPING_NOTICE "//try catch
+				   		+ "VALUES ('"+new_sni+"','"+ShipName+"')";
+					 //  String sql1 = "INSERT INTO SHIPPING_NOTICE "
+					 //  		+ "VALUES ('34234','Pollos')";
+					   System.out.println(sql);
+					 // stmt.executeQuery(sql);
+				   }
+				   catch(Exception e){
+					   e.printStackTrace();
+				   }
+				   
+				   
+				   System.out.println("For each item, please input Manufacturer Name,");
+				   System.out.println("Model Number,");
+				   System.out.println("and Quantity when prompted");
+				   
+				   System.out.println("Please Insert Manufacturer Name:");
+				   Manu = read.next();
+				   
+				   System.out.println("Please Insert Model Number:");
+				   Model = read.next();
+				   
+				   System.out.println("Please Insert Desired Quantity:");
+				   quantity = read.next();
+				   //sql statement goes here
+				   
+				 
+				   
+				   do{
+					   System.out.println("Would you like to enter an additional item?");
+					   yn = read.next();
+					   System.out.println(yn);
+					   if(yn.equals("no"))
+						   break;
+					   else{
+						   System.out.println("Please Insert Manufacturer Name:");
+						   Manu = read.next();
+						   
+						   System.out.println("Please Insert Model Number:");
+						   Model = read.next();
+						   
+						   System.out.println("Please Insert Current Quantity:");
+						   quantity = read.next();
+						   try{
+							   sql = "INSERT INTO Shipping_List " + //try catch
+									   "VALUES('"+Manu+"','"+Model+"','"+new_sni+"',"+quantity+")";
+							   stmt.executeUpdate(sql);
+						   		}
+				   catch(Exception e){
+					   e.printStackTrace();
+				   				}
+						   //sql statement goes here
+					   	   }
+					   
+				   }while(1==1);
+				   System.out.println("Order has been sent!");
+				   ResultSet res = Operate.Send_Ship_Notice(Integer.toString(new_sni),Model,Manu,quantity);
+				   //System.out.println(rs.getString(1));
+				   if(res ==null){
+					   r = new Random();
+					   int new_stock_num = r.nextInt((9999-1000)+1) + 1000;
+					   Integer.toString(new_stock_num);
+					   sql = "INSERT INTO Warehouse_item " + //try catch
+							   "VALUES('"+Model+"','"+Manu+"','"+new_stock_num+"','"+quantity+"','8','NULL','"+quantity+
+							   "',"+quantity+")";
+					   stmt.executeUpdate(sql);
+							   } 
+				   else{
+					   sql = "SELECT REPLENISHMENT FROM WAREHOUSE_ITEM WHERE MANUFACTURER='"+Manu+
+							   "' AND MODEL_NUM='"+Model+"'";
+					   try{
+						   PreparedStatement pe = Connect.prepareStatement(sql);
+						   ResultSet s = pe.executeQuery();
+						   if(s.next()){
+							   int rep = Integer.valueOf(s.getString(1));
+							   rep = rep + Integer.valueOf(quantity);
+							sql = "UPDATE WAREHOUSE_ITEM"
+									+ " SET REPLENISHMENT = "+quantity+""
+											+ " WHERE MANUFACTURER='"+Manu+
+							   "' AND MODEL_NUM='"+Model;
+							stmt.executeUpdate(sql);
+						   }
+					   }catch(Exception e){
+						   e.printStackTrace();
+					   }
+				   }
+				   break;
+				   
+				   
+				   
+
+					   
+			   }
+		   
+		   
 	   
 	   				 
 	   				 }
