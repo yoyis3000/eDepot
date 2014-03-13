@@ -157,10 +157,41 @@ public class Main {
 		   				}
 				 
 				   
-				   do{
+				   do{ //-- this was after the order sent code
+					   ResultSet res = Operate.Send_Ship_Notice(Integer.toString(new_sni),Model,Manu,quantity);
+						 
+					   if(res ==null){
+						   r = new Random();
+						   int new_stock_num = r.nextInt((9999-1000)+1) + 1000;
+						   Integer.toString(new_stock_num);
+						   sql = "INSERT INTO Warehouse_item " + //try catch
+								   "VALUES('"+Model+"','"+Manu+"','"+new_stock_num+"','"+quantity+"','8','NULL','"+quantity+
+								   "',NULL)";
+						   stmt.executeUpdate(sql);
+								   } 
+					   else{
+						   sql = "SELECT REPLENISHMENT FROM WAREHOUSE_ITEM WHERE MANUFACTURER='"+Manu+
+								   "' AND MODEL_NUM='"+Model+"'";
+						   try{
+							   PreparedStatement pe = Connect.prepareStatement(sql);
+							   ResultSet s = pe.executeQuery();
+							   if(s.next()){
+								   int rep = Integer.valueOf(s.getString(1));
+								   rep = rep + Integer.valueOf(quantity);
+								sql = "UPDATE WAREHOUSE_ITEM"
+										+ " SET REPLENISHMENT = "+rep+""
+												+ " WHERE MANUFACTURER='"+Manu+
+								   "' AND MODEL_NUM='"+Model+"'";
+								stmt.executeUpdate(sql);
+							   }
+						   }catch(Exception e){
+							   e.printStackTrace();
+						   }
+					   }
+					   //--------- this was after the "Order has been sent block of code
 					   System.out.println("Would you like to enter an additional item?");
 					   yn = read.next();
-					   
+					  
 					   if(yn.equals("no"))
 						   break;
 					   else{
@@ -185,36 +216,7 @@ public class Main {
 					   
 				   }while(1==1);
 				   System.out.println("Order has been sent!");
-				   ResultSet res = Operate.Send_Ship_Notice(Integer.toString(new_sni),Model,Manu,quantity);
-				 
-				   if(res ==null){
-					   r = new Random();
-					   int new_stock_num = r.nextInt((9999-1000)+1) + 1000;
-					   Integer.toString(new_stock_num);
-					   sql = "INSERT INTO Warehouse_item " + //try catch
-							   "VALUES('"+Model+"','"+Manu+"','"+new_stock_num+"','"+quantity+"','8','NULL','"+quantity+
-							   "',NULL)";
-					   stmt.executeUpdate(sql);
-							   } 
-				   else{
-					   sql = "SELECT REPLENISHMENT FROM WAREHOUSE_ITEM WHERE MANUFACTURER='"+Manu+
-							   "' AND MODEL_NUM='"+Model+"'";
-					   try{
-						   PreparedStatement pe = Connect.prepareStatement(sql);
-						   ResultSet s = pe.executeQuery();
-						   if(s.next()){
-							   int rep = Integer.valueOf(s.getString(1));
-							   rep = rep + Integer.valueOf(quantity);
-							sql = "UPDATE WAREHOUSE_ITEM"
-									+ " SET REPLENISHMENT = "+rep+""
-											+ " WHERE MANUFACTURER='"+Manu+
-							   "' AND MODEL_NUM='"+Model+"'";
-							stmt.executeUpdate(sql);
-						   }
-					   }catch(Exception e){
-						   e.printStackTrace();
-					   }
-				   }
+				   
 				   break;
 			   case 2:
 				   String nprice;
@@ -261,6 +263,7 @@ public class Main {
 			   
 			   int butters;
 			   while(r!=null){
+				   sni = r.getString(1);
 				   tempsql = "SELECT QUANTITY FROM SHIPPING_LIST "
 				   		+ "WHERE SNI = '"+sni+"'";
 				   try{
@@ -277,8 +280,11 @@ public class Main {
 					   tempsql = "SELECT MANUFACTURER FROM SHIPPING_LIST WHERE SNI = '"+sni+"'";
 					   pe = Connect.prepareStatement(tempsql);
 					   r = pe.executeQuery();
-					   if(r.next())
+					   if(r.next()){
 						   man = r.getString(1);
+						   System.out.println(man+"what is it!!!");
+					   }
+						   
 					   r.close();
 					  
 					   
@@ -299,6 +305,8 @@ public class Main {
 					   if(r.next()){
 						   warequant = r.getString(1);
 						   System.out.println("--------ahhhhhh"+warequant);
+						   if(warequant==null)
+							   warequant = "0";
 					   }
 						   
 					   r.close();
@@ -306,21 +314,23 @@ public class Main {
 					   
 					   
 					   tempsql = "UPDATE WAREHOUSE_ITEM"
-								+ " SET REPLENISHMENT = 0, QUANTITY ="+samount+""
+								+ " SET REPLENISHMENT = 0, QUANTITY ="+Integer.toString(samount)+""
 										+ " WHERE MANUFACTURER='"+man+
-						   "' AND MODEL_NUM='"+mod;
-					   
-					   tempsql = "DELETE FROM SHIPPING_LIST WHERE SNI = '"+sni+"'";
+						   "' AND MODEL_NUM='"+mod+"'";
 					   stmt.executeUpdate(tempsql);
-					  
 					   
+					   tempsql = "DELETE FROM SHIPPING_LIST WHERE MODEL_NUM = '"+mod+"'"
+					   		+ "AND MANUFACTURER= '"+man+"'";
+					   stmt.executeUpdate(tempsql);
+					   r = Operate.checkShipping(sql); 
+					  
 				   }catch(Exception e){
 					   e.printStackTrace();
 				   }
 			   }
-			   tempsql = "DELETE * FROM SHIPPING_NOTICE";
+			   tempsql = "DELETE FROM SHIPPING_NOTICE";
 			   stmt.executeUpdate(tempsql);
-			   r = Operate.checkShipping(sql);
+			   
 		   }
 		  // while (r.next())
 		  /* {
@@ -328,8 +338,11 @@ public class Main {
 		      System.out.println(rs.getString(1));
 		   }*/
 			   
-		   r.close();
+		   //r.close();
 		   break;
+	   case 6:// Process cart and adjust values
+		  
+		
 	   
 	   				 
 	   				 }
