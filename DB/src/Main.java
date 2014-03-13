@@ -76,6 +76,9 @@ public class Main {
 	   System.out.println("What would you like to do today?");
 	   System.out.println("Enter 3 to check an Item quantity");
 	   System.out.println("Enter 4 If you are the manager");
+	   System.out.println("Enter 5 if you work at eDepot"
+	   		+ " and want to see if any shipments arrived");
+	   
 	   
 	   option =  read.nextInt();
 	   switch(option){
@@ -88,8 +91,12 @@ public class Main {
 			   p = Connect.prepareStatement(sql);
 			   rs = p.executeQuery();
 			   if(rs.next())
-				   System.out.println(rs.getString(1));
+				   System.out.println("Quantity is :"+rs.getString(1));
+			   
+			   else
+				   System.out.println("Sorry, your item doesn't exist");
 			   rs.close();
+				   
 		   }
 		   catch(Exception e){
 			   e.printStackTrace();
@@ -99,6 +106,8 @@ public class Main {
 		   //Going to send a shipping Notice
 			   System.out.println("Sup bro what would you like to do today?");
 			   System.out.println("Enter 1 if you want order some stock");
+			   System.out.println("Enter 2 if you want to change a price"
+			   		+ "of an item");
 			   option =  read.nextInt();
 			   switch(option){
 			   
@@ -118,7 +127,7 @@ public class Main {
 					 //  String sql1 = "INSERT INTO SHIPPING_NOTICE "
 					 //  		+ "VALUES ('34234','Pollos')";
 					   System.out.println(sql);
-					 // stmt.executeQuery(sql);
+					  stmt.executeQuery(sql);
 				   }
 				   catch(Exception e){
 					   e.printStackTrace();
@@ -138,13 +147,20 @@ public class Main {
 				   System.out.println("Please Insert Desired Quantity:");
 				   quantity = read.next();
 				   //sql statement goes here
-				   
+				   try{
+					   sql = "INSERT INTO Shipping_List " + //try catch
+							   "VALUES('"+Manu+"','"+Model+"','"+new_sni+"',"+quantity+")";
+					   stmt.executeUpdate(sql);
+				   		}
+		   catch(Exception e){
+			   e.printStackTrace();
+		   				}
 				 
 				   
 				   do{
 					   System.out.println("Would you like to enter an additional item?");
 					   yn = read.next();
-					   System.out.println(yn);
+					   
 					   if(yn.equals("no"))
 						   break;
 					   else{
@@ -170,14 +186,14 @@ public class Main {
 				   }while(1==1);
 				   System.out.println("Order has been sent!");
 				   ResultSet res = Operate.Send_Ship_Notice(Integer.toString(new_sni),Model,Manu,quantity);
-				   //System.out.println(rs.getString(1));
+				 
 				   if(res ==null){
 					   r = new Random();
 					   int new_stock_num = r.nextInt((9999-1000)+1) + 1000;
 					   Integer.toString(new_stock_num);
 					   sql = "INSERT INTO Warehouse_item " + //try catch
 							   "VALUES('"+Model+"','"+Manu+"','"+new_stock_num+"','"+quantity+"','8','NULL','"+quantity+
-							   "',"+quantity+")";
+							   "',NULL)";
 					   stmt.executeUpdate(sql);
 							   } 
 				   else{
@@ -190,9 +206,9 @@ public class Main {
 							   int rep = Integer.valueOf(s.getString(1));
 							   rep = rep + Integer.valueOf(quantity);
 							sql = "UPDATE WAREHOUSE_ITEM"
-									+ " SET REPLENISHMENT = "+quantity+""
+									+ " SET REPLENISHMENT = "+rep+""
 											+ " WHERE MANUFACTURER='"+Manu+
-							   "' AND MODEL_NUM='"+Model;
+							   "' AND MODEL_NUM='"+Model+"'";
 							stmt.executeUpdate(sql);
 						   }
 					   }catch(Exception e){
@@ -200,14 +216,120 @@ public class Main {
 					   }
 				   }
 				   break;
-				   
-				   
+			   case 2:
+				   String nprice;
+				   String snum;
+				   System.out.println("Insert Stock Number:");
+				   snum = read.next();
+				   System.out.println("Insert New Price:");
+				   nprice = read.next();
+				   sql = "UPDATE Catalog_Items SET PRICE= "+nprice+" WHERE"
+				   		+ " STOCKNUMBER='"+snum+"'";
+				   System.out.println(sql);
+				   try{
+						stmt.executeUpdate(sql);
+						System.out.println("Price has succesfully changed!");
+				   }
+				   catch(Exception e){
+					   e.printStackTrace();
+				   }
+				   break;
 				   
 
 					   
 			   }
-		   
-		   
+			   break;
+	   case 5:
+		
+			//select fname from MyTbl where rownum = 1
+		    sql = "SELECT SNI FROM SHIPPING_LIST WHERE ROWNUM = 1";
+		 
+		   String sni;
+		   ResultSet r = Operate.checkShipping(sql);
+		   if(r==null){
+			   System.out.println("Sorry No Shipments Today");
+			   break;
+		   }
+		   else{
+			   sni = r.getString(1);
+			   System.out.println(sni+"ahhh----hh");
+			   String tempsql,shipquant,warequant, man,mod;
+			   shipquant = "the";
+			   warequant = "the";
+			   man = "the";
+			   mod = "the";
+			   
+			   int butters;
+			   while(r!=null){
+				   tempsql = "SELECT QUANTITY FROM SHIPPING_LIST "
+				   		+ "WHERE SNI = '"+sni+"'";
+				   try{
+					   PreparedStatement pe = Connect.prepareStatement(tempsql);
+					   r = pe.executeQuery();
+					   if(r.next()){
+						   shipquant = r.getString(1);
+						   System.out.println(shipquant);
+					   }
+						   
+					   r.close();
+					   
+					   
+					   tempsql = "SELECT MANUFACTURER FROM SHIPPING_LIST WHERE SNI = '"+sni+"'";
+					   pe = Connect.prepareStatement(tempsql);
+					   r = pe.executeQuery();
+					   if(r.next())
+						   man = r.getString(1);
+					   r.close();
+					  
+					   
+					   tempsql = "SELECT MODEL_NUM FROM SHIPPING_LIST WHERE SNI = '"+sni+"'";
+					   pe = Connect.prepareStatement(tempsql);
+					   r = pe.executeQuery();
+					   if(r.next()){
+						   mod = r.getString(1);
+						   System.out.println("mod is " + mod);
+						   
+					   }
+						   
+					   r.close();
+					   tempsql = "SELECT QUANTITY FROM WAREHOUSE_ITEM WHERE MANUFACTURER = '"+man+"' "
+					   		+ "AND MODEL_NUM='"+mod+"'";
+					   pe = Connect.prepareStatement(tempsql);
+					   r = pe.executeQuery();
+					   if(r.next()){
+						   warequant = r.getString(1);
+						   System.out.println("--------ahhhhhh"+warequant);
+					   }
+						   
+					   r.close();
+					   int samount = Integer.valueOf(shipquant) + Integer.valueOf(warequant);
+					   
+					   
+					   tempsql = "UPDATE WAREHOUSE_ITEM"
+								+ " SET REPLENISHMENT = 0, QUANTITY ="+samount+""
+										+ " WHERE MANUFACTURER='"+man+
+						   "' AND MODEL_NUM='"+mod;
+					   
+					   tempsql = "DELETE FROM SHIPPING_LIST WHERE SNI = '"+sni+"'";
+					   stmt.executeUpdate(tempsql);
+					  
+					   
+				   }catch(Exception e){
+					   e.printStackTrace();
+				   }
+			   }
+			   tempsql = "DELETE * FROM SHIPPING_NOTICE";
+			   stmt.executeUpdate(tempsql);
+			   r = Operate.checkShipping(sql);
+		   }
+		  // while (r.next())
+		  /* {
+		      System.out.print("Column 1 returned ");
+		      System.out.println(rs.getString(1));
+		   }*/
+			   
+		   r.close();
+		   break;
 	   
 	   				 
 	   				 }
