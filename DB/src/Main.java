@@ -78,6 +78,7 @@ public class Main {
 	   System.out.println("Enter 4 If you are the manager");
 	   System.out.println("Enter 5 if you work at eDepot"
 	   		+ " and want to see if any shipments arrived");
+	   System.out.println("enter 6 to test cart");
 	   
 	   
 	   option =  read.nextInt();
@@ -342,7 +343,11 @@ public class Main {
 		   break;
 	   case 6:// Process cart and adjust values
 		  
-		
+		boolean cartstuff = Operate.CheckAndProcess();
+	    if (!cartstuff)
+	    	System.out.println("Didnt check out order");
+	    else
+	    	System.out.println("Everything worked out");
 	   
 	   				 
 	   				 }
